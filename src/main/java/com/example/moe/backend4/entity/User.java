@@ -1,40 +1,68 @@
 package com.example.moe.backend4.entity;
-
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "User")
+@Table(name = "User" , schema = "Joole", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {
+        "user_email"
+    })
+})
 public class User {
 
     //define fields
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idUser")
+    @Column(name = "id_user")
     private int id;
 
-    @Column(name = "firstName")
+    @NotBlank
+    @Size(min=3, max = 50)
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "lastName")
+    @NotBlank
+    @Size(min=3, max = 50)
+    @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "userEmail")
+    @NaturalId
+    @NotBlank
+    @Size(max = 50)
+    @Email
+    @Column(name = "user_email")
     private String email;
 
   
     //TODO: fix this
-    @Column(name = "userPassword")
+    @NotBlank
+    @Size(min=6, max = 100)
+    @Column(name = "user_password")
     private String password;
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "Cart_idCart")
-    private int cartId;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles", 
+      joinColumns = @JoinColumn(name = "user_id"), 
+      inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
     //define constructors
     public User() {
 
@@ -44,10 +72,14 @@ public class User {
         this.password =  password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.cartId = cart;
     }
     //getter/setter
-    
+    public void setId (int theId){
+        this.id = theId;
+    }
+    public int getID (){
+        return this.id;
+    }
     public Object getEmail() {
         return this.email;
     }
@@ -73,11 +105,18 @@ public class User {
         this.password = pass;
     };
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+ 
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
    
     //toString method
     @Override
     public String toString(){
-        return "User: [id = " + this.id + ", first name = " +this.firstName + ", last name = " + this.lastName + ", email = " + this.email + ", cartID = " + this.cartId + "testPass = " +this.password+"]";
-        
+        return "User: [id = " + this.id + ", first name = " +this.firstName + ", last name = " + this.lastName + ", email = " + this.email + "testPass = " +this.password+"]";
+
     }
 }
